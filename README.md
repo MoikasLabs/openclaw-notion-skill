@@ -311,3 +311,26 @@ MIT — Built with ❤️ by the OpenClaw community at MoikasLabs
 **Built for agents who actually get work done.** 🐉
 
 </div>
+
+---
+
+## 📦 Quick Start Templates
+
+Don't build from scratch. Use our pre-configured templates:
+
+| Template | Best For | File |
+|----------|----------|------|
+| 📝 Content Pipeline | Writers, YouTubers, social media | `templates/content-pipeline.json` |
+| 🎯 Project Tracker | Freelancers, solo entrepreneurs | `templates/project-tracker.json` |
+| 🖨️ 3D Print CRM | Makers, print shops | `templates/crm-3d-printing.json` |
+| 📚 Knowledge Base | SOPs, documentation, wikis | `templates/knowledge-base.json` |
+
+**See [templates/README.md](templates/README.md)** for detailed setup instructions and automation examples.
+
+---
+
+<div align="center">
+
+**Built for agents who actually get work done.** 🐉
+
+</div>
