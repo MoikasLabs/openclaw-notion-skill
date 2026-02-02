@@ -123,7 +123,60 @@ const commands = {
       notion.blocks.children.list({ block_id: cleanPageId, page_size: 100 }),
     ]);
     
-    out({ page, blocks: blocks.results });
+    // Format blocks for readability
+    const formattedBlocks = blocks.results.map(block => {
+      const type = block.type;
+      let content = "";
+      
+      switch (type) {
+        case "paragraph":
+          content = block.paragraph.rich_text.map(t => t.text.content).join("");
+          break;
+        case "heading_1":
+          content = "# " + block.heading_1.rich_text.map(t => t.text.content).join("");
+          break;
+        case "heading_2":
+          content = "## " + block.heading_2.rich_text.map(t => t.text.content).join("");
+          break;
+        case "heading_3":
+          content = "### " + block.heading_3.rich_text.map(t => t.text.content).join("");
+          break;
+        case "bulleted_list_item":
+          content = "• " + block.bulleted_list_item.rich_text.map(t => t.text.content).join("");
+          break;
+        case "numbered_list_item":
+          content = "1. " + block.numbered_list_item.rich_text.map(t => t.text.content).join("");
+          break;
+        case "code":
+          content = "```" + block.code.language + "\n" + 
+                    block.code.rich_text.map(t => t.text.content).join("") + 
+                    "\n```";
+          break;
+        case "quote":
+          content = "> " + block.quote.rich_text.map(t => t.text.content).join("");
+          break;
+        case "to_do":
+          const checked = block.to_do.checked ? "[x]" : "[ ]";
+          content = checked + " " + block.to_do.rich_text.map(t => t.text.content).join("");
+          break;
+        default:
+          content = `[${type}]`;
+      }
+      
+      return { type, content };
+    });
+    
+    out({ 
+      page: {
+        id: page.id,
+        url: page.url,
+        created: page.created_time,
+        last_edited: page.last_edited_time,
+        properties: page.properties
+      }, 
+      body: formattedBlocks,
+      block_count: blocks.results.length
+    });
   },
 
   async "update-page"(pageId, ...args) {
@@ -140,6 +193,89 @@ const commands = {
     const result = await notion.pages.update({ page_id: cleanPageId, properties });
     
     out({ id: result.id, url: result.url, last_edited: result.last_edited_time });
+  },
+
+  async "append-body"(pageId, ...args) {
+    const notion = getClient();
+    const cleanPageId = cleanId(pageId);
+    
+    // Parse arguments
+    const typeIdx = args.indexOf("--type");
+    const textIdx = args.indexOf("--text");
+    const blocksIdx = args.indexOf("--blocks");
+    
+    let blocks = [];
+    
+    if (blocksIdx !== -1 && args[blocksIdx + 1]) {
+      // Full JSON blocks mode (advanced)
+      blocks = JSON.parse(args[blocksIdx + 1]);
+    } else if (textIdx !== -1 && args[textIdx + 1]) {
+      // Simple text mode with optional type
+      const text = args[textIdx + 1];
+      const type = (typeIdx !== -1 && args[typeIdx + 1]) ? args[typeIdx + 1] : "paragraph";
+      
+      const richText = [{ type: "text", text: { content: text } }];
+      
+      switch (type) {
+        case "h1":
+        case "heading_1":
+          blocks.push({ object: "block", type: "heading_1", heading_1: { rich_text: richText } });
+          break;
+        case "h2":
+        case "heading_2":
+          blocks.push({ object: "block", type: "heading_2", heading_2: { rich_text: richText } });
+          break;
+        case "h3":
+        case "heading_3":
+          blocks.push({ object: "block", type: "heading_3", heading_3: { rich_text: richText } });
+          break;
+        case "bullet":
+        case "bulleted_list_item":
+          blocks.push({ object: "block", type: "bulleted_list_item", bulleted_list_item: { rich_text: richText } });
+          break;
+        case "numbered":
+        case "numbered_list_item":
+          blocks.push({ object: "block", type: "numbered_list_item", numbered_list_item: { rich_text: richText } });
+          break;
+        case "todo":
+        case "to_do":
+          blocks.push({ object: "block", type: "to_do", to_do: { rich_text: richText, checked: false } });
+          break;
+        case "quote":
+          blocks.push({ object: "block", type: "quote", quote: { rich_text: richText } });
+          break;
+        case "code":
+          const langIdx = args.indexOf("--lang");
+          const language = (langIdx !== -1 && args[langIdx + 1]) ? args[langIdx + 1] : "plain text";
+          blocks.push({ object: "block", type: "code", code: { rich_text: richText, language } });
+          break;
+        case "divider":
+          blocks.push({ object: "block", type: "divider", divider: {} });
+          break;
+        default:
+          blocks.push({ object: "block", type: "paragraph", paragraph: { rich_text: richText } });
+      }
+    } else {
+      console.error("❌ Error: --text or --blocks required");
+      console.error("Examples:");
+      console.error('  node notion-cli.js append-body PAGE_ID --text "Hello world"');
+      console.error('  node notion-cli.js append-body PAGE_ID --text "My Heading" --type h2');
+      console.error('  node notion-cli.js append-body PAGE_ID --text "TODO item" --type todo');
+      console.error('  node notion-cli.js append-body PAGE_ID --text "console.log(1)" --type code --lang javascript');
+      process.exit(1);
+    }
+    
+    const result = await notion.blocks.children.append({
+      block_id: cleanPageId,
+      children: blocks,
+    });
+    
+    out({ 
+      success: true, 
+      page_id: pageId,
+      appended_blocks: blocks.length,
+      types: blocks.map(b => b.type)
+    });
   },
 
   async search(query) {
@@ -180,15 +316,28 @@ Usage: node notion-cli.js <command> [args]
 
 Commands:
   test                      Test connection and list accessible pages
+  
   query-database <id>       Query database entries
     [--filter '<json>']     Filter results
+  
   add-entry <id>            Add entry to database
     --title "Name"
     [--properties '<json>'] Additional properties
-  get-page <id>             Get page content and properties
+  
+  get-page <id>             Get page content, properties, and body blocks
+  
   update-page <id>          Update page properties
     --properties '<json>'   Properties to update
+  
+  append-body <id>          Add content to page body
+    --text "content"        Text content to add
+    --type <type>           Block type: paragraph, h1, h2, h3, bullet, numbered, 
+                            todo, quote, code, divider (default: paragraph)
+    --lang <language>       Code language (for --type code)
+    --blocks '<json>'       Raw JSON blocks array (advanced)
+  
   get-database <id>         Get database schema
+  
   search <query>            Search workspace
 
 Environment:
@@ -196,11 +345,19 @@ Environment:
 
 Examples:
   node notion-cli.js test
+  
   node notion-cli.js query-database abc123... --filter '{"property":"Status","select":{"equals":"Done"}}'
+  
   node notion-cli.js add-entry abc123... --title "New Idea" --properties '{"Status":{"select":{"name":"Idea"}}}'
+  
+  node notion-cli.js append-body page123... --text "## Research Notes" --type h2
+  node notion-cli.js append-body page123... --text "First bullet point" --type bullet
+  node notion-cli.js append-body page123... --text "Review documentation" --type todo
+  node notion-cli.js append-body page123... --text "const x = 1;" --type code --lang javascript
+  
   node notion-cli.js search "content ideas"
 
-Database ID Format:
+Database/Page ID Format:
   From URL: https://www.notion.so/workspace/ABC123...
   Use: ABC123... (32 characters, no hyphens)
 `);
