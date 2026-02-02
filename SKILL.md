@@ -317,6 +317,72 @@ That's it! No build step required for the standalone version.
 node notion-cli.js test
 ```
 
+## Page Body Editing
+
+Add rich content to page bodies, not just properties.
+
+### Append Content Blocks
+
+```bash
+# Add heading
+node notion-cli.js append-body PAGE_ID --text "Research Summary" --type h2
+
+# Add paragraph (default)
+node notion-cli.js append-body PAGE_ID --text "Detailed findings go here..."
+
+# Add bullet list item
+node notion-cli.js append-body PAGE_ID --text "First key finding" --type bullet
+
+# Add numbered list item
+node notion-cli.js append-body PAGE_ID --text "Step one description" --type numbered
+
+# Add TODO checkbox
+node notion-cli.js append-body PAGE_ID --text "Create video script" --type todo
+
+# Add quote
+node notion-cli.js append-body PAGE_ID --text "Important quote from source" --type quote
+
+# Add code block
+node notion-cli.js append-body PAGE_ID --text "const result = optimizeSupports();" --type code --lang javascript
+```
+
+### Supported Block Types
+
+| Type | Description | Example Use |
+|------|-------------|-------------|
+| `paragraph` | Regular text (default) | Descriptions, explanations |
+| `h1`, `h2`, `h3` | Headings | Section organization |
+| `bullet` | Bulleted list | Key findings, features |
+| `numbered` | Numbered list | Step-by-step instructions |
+| `todo` | Checkbox item | Action items, tasks |
+| `quote` | Blockquote | Source citations |
+| `code` | Code block | Snippets, commands |
+| `divider` | Horizontal line | Section separation |
+
+### Get Page with Body Content
+
+```bash
+# Get full page including formatted body
+node notion-cli.js get-page PAGE_ID
+```
+
+Returns:
+- Page properties
+- Formatted body blocks (type + content preview)
+- Block count
+
+### Advanced: Raw JSON Blocks
+
+For complex layouts, use raw Notion block JSON:
+
+```bash
+node notion-cli.js append-body PAGE_ID --blocks '[
+  {"object":"block","type":"heading_2","heading_2":{"rich_text":[{"text":{"content":"Research Notes"}}]}},
+  {"object":"block","type":"bulleted_list_item","bulleted_list_item":{"rich_text":[{"text":{"content":"Finding 1"}}]}},
+  {"object":"block","type":"code","code":{"rich_text":[{"text":{"content":"console.log(1)"}}],"language":"javascript"}}
+]'
+```
+
 ## Advanced: Webhook Sync
 
 For bidirectional sync (Notion changes → OpenClaw):
