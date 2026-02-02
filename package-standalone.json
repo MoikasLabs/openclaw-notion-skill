@@ -1,0 +1,22 @@
+{
+  "name": "@openclaw/notion-skill-standalone",
+  "version": "1.0.0",
+  "description": "Standalone Notion CLI for OpenClaw - no build required",
+  "main": "notion-cli.js",
+  "bin": {
+    "notion-skill": "notion-cli.js"
+  },
+  "scripts": {
+    "test": "node notion-cli.js test"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.15"
+  },
+  "keywords": [
+    "openclaw",
+    "notion",
+    "skill",
+    "cli"
+  ],
+  "license": "MIT"
+}
