@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/notion-skill",
+  "name": "openclaw-notion-skill",
   "version": "0.1.0",
   "description": "Notion integration for OpenClaw - query databases, manage pages, and sync knowledge",
   "main": "dist/index.js",
