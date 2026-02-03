@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw](https://img.shields.io/badge/Built%20for-OpenClaw-6E4C9E)](https://openclaw.ai)
 [![Notion](https://img.shields.io/badge/Powered%20by-Notion-black)](https://notion.so)
+[![Support Project](https://img.shields.io/badge/💝%20Support-ETH%20Tip-orange)](./SUPPORT.md)
 
 </div>
 
@@ -302,6 +303,7 @@ MIT — Built with ❤️ by the OpenClaw community at MoikasLabs
 - [OpenClaw Docs](https://docs.openclaw.ai)
 - [Notion API Docs](https://developers.notion.com)
 - [Issue Tracker](https://github.com/MoikasLabs/openclaw-notion-skill/issues)
+- [Support Project](./SUPPORT.md) 💝
 - [MoikasLabs](https://github.com/MoikasLabs)
 
 ---
