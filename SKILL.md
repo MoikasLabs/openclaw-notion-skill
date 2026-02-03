@@ -43,12 +43,12 @@ Retrieve entries from any database you've shared.
 ```typescript
 // Using the Notion skill via exec
 await exec({
-  command: `npx @openclaw/notion-client query-database ${databaseId}`
+  command: `node ~/.agents/skills/notion/notion-cli.js query-database ${databaseId}`
 });
 
 // With filters (example: status = "In Progress")
 await exec({
-  command: `npx @openclaw/notion-client query-database ${databaseId} --filter '{"property":"Status","select":{"equals":"In Progress"}}'`
+  command: `node ~/.agents/skills/notion/notion-cli.js query-database ${databaseId} --filter '{"property":"Status","select":{"equals":"In Progress"}}'`
 });
 ```
 
@@ -61,7 +61,7 @@ Create a new row in a database.
 ```typescript
 // Add entry with multiple properties
 await exec({
-  command: `npx @openclaw/notion-client add-entry ${databaseId} \
+  command: `node ~/.agents/skills/notion/notion-cli.js add-entry ${databaseId} \
     --title "My New Content Idea" \
     --properties '${JSON.stringify({
       "Status": { "select": { "name": "Idea" } },
@@ -78,7 +78,7 @@ Read the content of any page (including database entries).
 
 ```typescript
 await exec({
-  command: `npx @openclaw/notion-client get-page ${pageId}`
+  command: `node ~/.agents/skills/notion/notion-cli.js get-page ${pageId}`
 });
 ```
 
@@ -91,7 +91,7 @@ Modify properties or append content to an existing page.
 ```typescript
 // Update properties
 await exec({
-  command: `npx @openclaw/notion-client update-page ${pageId} \
+  command: `node ~/.agents/skills/notion/notion-cli.js update-page ${pageId} \
     --properties '${JSON.stringify({
       "Status": { "select": { "name": "In Progress" } }
     })}'`
@@ -99,11 +99,8 @@ await exec({
 
 // Append content blocks
 await exec({
-  command: `npx @openclaw/notion-client append-blocks ${pageId} \
-    --blocks '${JSON.stringify([
-      { "object": "block", "type": "heading_2", "heading_2": { "rich_text": [{ "text": { "content": "Research Notes" } }] } },
-      { "object": "block", "type": "bulleted_list_item", "bulleted_list_item": { "rich_text": [{ "text": { "content": "Key finding #1" } }] } }
-    ])}'`
+  command: `node ~/.agents/skills/notion/notion-cli.js append-body ${pageId} \
+    --text "Research Notes" --type h2`
 });
 ```
 
@@ -113,7 +110,7 @@ Find pages across your shared workspace.
 
 ```typescript
 await exec({
-  command: `npx @openclaw/notion-client search "content ideas"`
+  command: `node ~/.agents/skills/notion/notion-cli.js search "content ideas"`
 });
 ```
 
@@ -133,7 +130,7 @@ await exec({
 ```typescript
 // Research scout adds findings to Notion
 await exec({
-  command: `npx @openclaw/notion-client add-entry ${contentDbId} \
+  command: `node ~/.agents/skills/notion/notion-cli.js add-entry ${contentDbId} \
     --title "New 3D Print Technique" \
     --properties '${JSON.stringify({
       "Status": { "select": { "name": "Idea" } },
@@ -144,7 +141,7 @@ await exec({
 
 // Later: Update when drafting
 await exec({
-  command: `npx @openclaw/notion-client update-page ${entryId} \
+  command: `node ~/.agents/skills/notion/notion-cli.js update-page ${entryId} \
     --properties '${JSON.stringify({
       "Status": { "select": { "name": "Draft" } },
       "Draft Content": { "rich_text": [{ "text": { "content": "Draft text here..." } }] }
@@ -168,7 +165,7 @@ await exec({
 ```typescript
 // Query all "In Progress" projects
 await exec({
-  command: `npx @openclaw/notion-client query-database ${projectsDbId} --filter '{"property":"Status","select":{"equals":"In Progress"}}'`
+  command: `node ~/.agents/skills/notion/notion-cli.js query-database ${projectsDbId} --filter '{"property":"Status","select":{"equals":"In Progress"}}'`
 });
 ```
 
@@ -187,7 +184,7 @@ await exec({
 ```typescript
 // New order → create CRM entry
 await exec({
-  command: `npx @openclaw/notion-client add-entry ${crmDbId} \
+  command: `node ~/.agents/skills/notion/notion-cli.js add-entry ${crmDbId} \
     --title "${customerName}" \
     --properties '${JSON.stringify({
       "Status": { "select": { "name": "Ordered" } },
@@ -210,7 +207,7 @@ await exec({
 ```typescript
 // Search for "stringing" to find 3D print troubleshooting
 await exec({
-  command: `npx @openclaw/notion-client search "stringing"`
+  command: `node ~/.agents/skills/notion/notion-cli.js search "stringing"`
 });
 ```
 
@@ -281,7 +278,7 @@ NOTION_TOKEN=secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 Or set per-command:
 ```bash
-NOTION_TOKEN=secret_xxx npx @openclaw/notion-client ...
+NOTION_TOKEN=secret_xxx node notion-cli.js ...
 ```
 
 ## Error Handling
