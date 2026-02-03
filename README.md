@@ -37,6 +37,15 @@ Transform your Notion workspace into a living knowledge base that your AI agents
 
 ## 🚀 Quick Start (5 Minutes)
 
+### Install via Clawhub (Coming Soon)
+
+Once published:
+```bash
+openclaw skills install notion-enhanced
+```
+
+### Manual Install
+
 ### 1. Create Notion Integration
 
 ```
