@@ -18,11 +18,17 @@ Notion doesn't support direct JSON import, but these templates serve as:
 3. Configure options (select values, tags, etc.)
 4. Customize if needed — these are starting points
 
+**💡 Pro Tip:** Add an **`ID`** property with type **unique ID** to auto-number entries (#1, #2, #3...). Then reference entries as `ID#3` instead of long UUIDs!
+
 ### 3. Connect to OpenClaw
 
 1. Share the database with your integration (Share → Add connections)
 2. Get the database ID from the URL
 3. Start using with `notion-cli.js`
+
+**Smart ID Reference:**
+- **Notion ID:** `node notion-cli.js append-body '#3' --database DB_ID --text "content"`
+- **Direct UUID:** `node notion-cli.js append-body 2fb3e4ac... --text "content"`
 
 ---
 

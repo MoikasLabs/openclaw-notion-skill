@@ -317,6 +317,40 @@ That's it! No build step required for the standalone version.
 node notion-cli.js test
 ```
 
+## Smart ID Resolution
+
+Reference entries by **Notion auto-ID** (e.g., `#3`) or **direct UUID**.
+
+### By Notion ID (Recommended for Manual Use)
+
+Use the number you see in your database's ID column:
+
+```bash
+# Get entry #3
+node notion-cli.js get-page '#3' DATABASE_ID
+
+# Add content to entry #3
+node notion-cli.js append-body '#3' --database DATABASE_ID \
+  --text "Research notes" --type h2
+
+# Add bullet to entry #3
+node notion-cli.js append-body '#3' --database DATABASE_ID \
+  --text "Key finding" --type bullet
+```
+
+### By Direct UUID (For Automation)
+
+```bash
+# Using full UUID from Notion URL
+node notion-cli.js get-page 2fb3e4ac...
+node notion-cli.js append-body 2fb3e4ac... \
+  --text "Content" --type paragraph
+```
+
+**Auto-detection:** Starts with `#` = Notion ID lookup. 32-char hex = Direct UUID.
+
+**Pro Tip:** Add an `ID` property (type: unique ID) to auto-number entries as #1, #2, #3...
+
 ## Page Body Editing
 
 Add rich content to page bodies, not just properties.
