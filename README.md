@@ -24,6 +24,7 @@ Transform your Notion workspace into a living knowledge base that your AI agents
 | 🔍 **Search Workspace** | Find pages across your entire shared workspace |
 | 🔄 **Update Content** | Modify properties and append blocks dynamically |
 | 🗂️ **View Schemas** | Inspect database structures programmatically |
+| 🔢 **Smart ID Reference** | Use Notion ID `#3` or direct UUID — your choice |
 
 **Perfect for:**
 - Content creators managing editorial calendars
@@ -100,6 +101,40 @@ node notion-cli.js search "tree support"
 node notion-cli.js update-page page-id-123... \
   --properties '{"Status":{"select":{"name":"Draft"}}}'
 ```
+
+### Smart ID Resolution (Notion ID or UUID)
+
+**Reference entries by Notion ID (what you see in the ID column):**
+
+```bash
+# Get page by Notion ID #3 - auto-resolves to actual page ID
+node notion-cli.js get-page '#3' DATABASE_ID
+
+# Append content using Notion ID
+node notion-cli.js append-body '#3' \
+  --database DATABASE_ID \
+  --text "Research notes here" \
+  --type h2
+
+# Add a link to entry #3
+node notion-cli.js append-body '#3' \
+  --database DATABASE_ID \
+  --text "Example: https://makerworld.com/models/123" \
+  --type bullet
+```
+
+**Or use direct UUID for automation:**
+
+```bash
+# Direct UUID (copy from URL)
+node notion-cli.js append-body 2fb3e4ac... \
+  --text "Content here" \
+  --type paragraph
+```
+
+The CLI auto-detects:
+- Starts with `#` → **Notion ID** lookup (requires database ID)
+- 32-char hex → **Direct UUID** (no database needed)
 
 ### From OpenClaw
 
