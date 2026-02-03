@@ -1,4 +1,4 @@
-# OpenClaw Notion Skill v1.0.0 - Pull Request
+# OpenClaw Notion Skill v0.1.0 - Pull Request
 
 ## 🎯 Summary
 
@@ -97,7 +97,7 @@ LICENSE             - MIT license
 
 ## 🔮 Next Steps (Post-Merge)
 
-- [ ] Create GitHub release v1.0.0
+- [ ] Create GitHub release v0.1.0
 - [ ] Submit to OpenClaw community forums
 - [ ] Share on Twitter/MakerWorld
 - [ ] Collect feedback for v1.1

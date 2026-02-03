@@ -1,6 +1,6 @@
 ---
 name: notion
-version: 1.0.0
+version: 0.1.0
 description: Integrate with Notion workspaces to read pages, query databases, create entries, and manage content. Perfect for knowledge bases, project tracking, content calendars, CRMs, and collaborative documentation. Works with any Notion page or database you explicitly share with the integration.
 ---
 

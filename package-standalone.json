@@ -1,6 +1,6 @@
 {
   "name": "@openclaw/notion-skill-standalone",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Standalone Notion CLI for OpenClaw - no build required",
   "main": "notion-cli.js",
   "bin": {
