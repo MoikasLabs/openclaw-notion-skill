@@ -56,34 +56,61 @@ const commands = {
       filter = JSON.parse(args[filterIdx + 1]);
     }
     
+    // Numbered output option
+    const numberedIdx = args.indexOf("--numbered");
+    const showNumbers = numberedIdx !== -1;
+    
     const response = await notion.databases.query({
       database_id: cleanDbId,
       filter,
       page_size: 100,
     });
     
-    const simplified = response.results.map((page) => ({
-      id: page.id,
-      url: page.url,
-      created: page.created_time,
-      properties: Object.fromEntries(
-        Object.entries(page.properties).map(([k, v]) => {
-          // Simplify property values
-          let val = v;
-          if (v.title) val = v.title.map((t) => t.text.content).join("");
-          else if (v.rich_text) val = v.rich_text.map((t) => t.text.content).join("");
-          else if (v.select) val = v.select.name;
-          else if (v.multi_select) val = v.multi_select.map((s) => s.name);
-          else if (v.status) val = v.status.name;
-          else if (v.date) val = v.date;
-          else if (v.number !== undefined) val = v.number;
-          else if (v.checkbox !== undefined) val = v.checkbox;
-          else if (v.email) val = v.email;
-          else if (v.url) val = v.url;
-          return [k, val];
-        })
-      ),
-    }));
+    const simplified = response.results.map((page, index) => {
+      const entry = {
+        id: page.id,
+        url: page.url,
+        created: page.created_time,
+        properties: Object.fromEntries(
+          Object.entries(page.properties).map(([k, v]) => {
+            // Simplify property values
+            let val = v;
+            if (v.title) val = v.title.map((t) => t.text.content).join("");
+            else if (v.rich_text) val = v.rich_text.map((t) => t.text.content).join("");
+            else if (v.select) val = v.select.name;
+            else if (v.multi_select) val = v.multi_select.map((s) => s.name);
+            else if (v.status) val = v.status.name;
+            else if (v.date) val = v.date;
+            else if (v.number !== undefined) val = v.number;
+            else if (v.checkbox !== undefined) val = v.checkbox;
+            else if (v.email) val = v.email;
+            else if (v.url) val = v.url;
+            return [k, val];
+          })
+        ),
+      };
+      
+      if (showNumbers) {
+        entry.entry_number = index + 1;
+      }
+      
+      return entry;
+    });
+    
+    // If numbered, also save mapping for reference
+    if (showNumbers && simplified.length > 0) {
+      const mapping = {};
+      simplified.forEach(entry => {
+        mapping[`#${entry.entry_number}`] = entry.id;
+      });
+      
+      // Save to temp file for potential ID lookup
+      const fs = require('fs');
+      const os = require('os');
+      const path = require('path');
+      const mappingPath = path.join(os.tmpdir(), 'notion-entry-mapping.json');
+      fs.writeFileSync(mappingPath, JSON.stringify(mapping, null, 2));
+    }
     
     out(simplified);
   },
@@ -305,6 +332,36 @@ const commands = {
       properties: result.properties,
     });
   },
+
+  async "entry-by-number"(dbId, numberStr) {
+    const notion = getClient();
+    const cleanDbId = cleanId(dbId);
+    const targetNumber = parseInt(numberStr.replace(/^#/, ""), 10);
+    
+    if (isNaN(targetNumber) || targetNumber < 1) {
+      console.error("❌ Invalid entry number. Use: entry-by-number DB_ID #3");
+      process.exit(1);
+    }
+    
+    const response = await notion.databases.query({
+      database_id: cleanDbId,
+      page_size: 100,
+    });
+    
+    if (targetNumber > response.results.length) {
+      console.error(`❌ Only ${response.results.length} entries found. #${targetNumber} doesn't exist.`);
+      process.exit(1);
+    }
+    
+    const entry = response.results[targetNumber - 1];
+    out({
+      entry_number: targetNumber,
+      id: entry.id,
+      url: entry.url,
+      name: entry.properties.Name?.title?.[0]?.text?.content || "Untitled",
+      created: entry.created_time,
+    });
+  },
 };
 
 // Help
@@ -319,6 +376,7 @@ Commands:
   
   query-database <id>       Query database entries
     [--filter '<json>']     Filter results
+    [--numbered]            Show entry numbers (ID#1, ID#2...)
   
   add-entry <id>            Add entry to database
     --title "Name"
@@ -336,6 +394,8 @@ Commands:
     --lang <language>       Code language (for --type code)
     --blocks '<json>'       Raw JSON blocks array (advanced)
   
+  entry-by-number <db> <#>  Get entry ID by number (use with --numbered)
+
   get-database <id>         Get database schema
   
   search <query>            Search workspace
@@ -344,18 +404,23 @@ Environment:
   NOTION_TOKEN    Required. Set in ~/.openclaw/.env
 
 Examples:
-  node notion-cli.js test
+  # List entries with ID numbers
+  node notion-cli.js query-database abc123... --numbered
   
-  node notion-cli.js query-database abc123... --filter '{"property":"Status","select":{"equals":"Done"}}'
+  # Reference entry by number
+  node notion-cli.js entry-by-number abc123... #3
   
-  node notion-cli.js add-entry abc123... --title "New Idea" --properties '{"Status":{"select":{"name":"Idea"}}}'
+  # Add content to a specific entry
+  node notion-cli.js append-body page123... --text "Research notes" --type h2
   
-  node notion-cli.js append-body page123... --text "## Research Notes" --type h2
-  node notion-cli.js append-body page123... --text "First bullet point" --type bullet
-  node notion-cli.js append-body page123... --text "Review documentation" --type todo
-  node notion-cli.js append-body page123... --text "const x = 1;" --type code --lang javascript
-  
-  node notion-cli.js search "content ideas"
+  # Filter and find
+  node notion-cli.js query-database abc123... --filter '{"property":"Status","select":{"equals":"Idea"}}'
+
+Quick Reference by Entry Number:
+  1. List with numbers: node notion-cli.js query-database DB_ID --numbered
+  2. You'll see: ID#1, ID#2, ID#3...
+  3. Get ID: node notion-cli.js entry-by-number DB_ID #3
+  4. Use that ID for append-body, get-page, etc.
 
 Database/Page ID Format:
   From URL: https://www.notion.so/workspace/ABC123...
