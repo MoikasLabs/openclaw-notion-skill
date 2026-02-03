@@ -8,6 +8,15 @@ description: Integrate with Notion workspaces to read pages, query databases, cr
 
 Connect your Notion workspace to OpenClaw for seamless knowledge management and project tracking.
 
+## When to Use This Skill
+
+Use Notion when the user wants to:
+- **Add items to a database** (backlog, todos, tracking)
+- **Create new pages** in a database or as children of existing pages  
+- **Query/search** their Notion workspace for information
+- **Update existing pages** (status, notes, properties)
+- **Read page content** or database entries
+
 ## Setup
 
 ### 1. Create Notion Integration
